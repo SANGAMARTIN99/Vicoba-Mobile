@@ -47,7 +47,14 @@ class AppLocalizations {
       'role_TREASURER': 'Treasurer',
       'role_MEMBER': 'Member',
       'role_AUDITOR': 'Auditor',
+      'role_LOAN_OFFICER': 'Loan Officer',
       'role_PLATFORM_ADMIN': 'Platform Admin',
+
+      // Navigation Sections
+      'navSectionCore': 'Core Services',
+      'navSectionOperations': 'Financial & Operations',
+      'navSectionLeadership': 'Leadership & Oversight',
+      'navSectionPreferences': 'Preferences & System',
 
       // Onboarding
       'onboarding_title_1': 'Community Savings & Trust',
@@ -267,7 +274,14 @@ class AppLocalizations {
       'role_TREASURER': 'Mweka Hazina',
       'role_MEMBER': 'Mwanachama',
       'role_AUDITOR': 'Mkaguzi wa Hesabu',
+      'role_LOAN_OFFICER': 'Afisa Mikopo',
       'role_PLATFORM_ADMIN': 'Msimamizi Mkuu',
+
+      // Navigation Sections
+      'navSectionCore': 'Huduma za Msingi',
+      'navSectionOperations': 'Fedha na Uendeshaji',
+      'navSectionLeadership': 'Uongozi na Ukaguzi',
+      'navSectionPreferences': 'Mipangilio na Mfumo',
 
       // Onboarding
       'onboarding_title_1': 'Akiba na Uaminifu wa Jamii',

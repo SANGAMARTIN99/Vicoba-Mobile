@@ -26,19 +26,31 @@ class AuthProvider extends ChangeNotifier {
 
   bool get isAuthenticated => _token != null && _token!.isNotEmpty;
 
+  String get currentRole => _activeContext?.role.toUpperCase() ?? 'MEMBER';
+
   // Role helpers
   bool get isLeader {
-    final role = _activeContext?.role.toUpperCase() ?? '';
+    final role = currentRole;
     return role == 'CHAIRPERSON' ||
         role == 'SECRETARY' ||
         role == 'TREASURER' ||
         role == 'PLATFORM_ADMIN';
   }
 
-  bool get isTreasurer => _activeContext?.role.toUpperCase() == 'TREASURER';
-  bool get isChairperson => _activeContext?.role.toUpperCase() == 'CHAIRPERSON';
-  bool get isSecretary => _activeContext?.role.toUpperCase() == 'SECRETARY';
-  bool get isPlatformAdmin => _activeContext?.role.toUpperCase() == 'PLATFORM_ADMIN';
+  bool get isTreasurer => currentRole == 'TREASURER';
+  bool get isChairperson => currentRole == 'CHAIRPERSON';
+  bool get isSecretary => currentRole == 'SECRETARY';
+  bool get isAuditor => currentRole == 'AUDITOR';
+  bool get isLoanOfficer => currentRole == 'LOAN_OFFICER';
+  bool get isMember => currentRole == 'MEMBER';
+  bool get isPlatformAdmin => currentRole == 'PLATFORM_ADMIN';
+
+  bool hasRole(List<String> allowedRoles) {
+    if (allowedRoles.isEmpty || allowedRoles.contains('ALL') || isPlatformAdmin) {
+      return true;
+    }
+    return allowedRoles.map((r) => r.toUpperCase()).contains(currentRole);
+  }
 
   AuthProvider() {
     _client.onUnauthorized = () {
