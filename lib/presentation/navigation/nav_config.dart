@@ -29,6 +29,7 @@ class NavItem {
   final String id;
   final String labelKey;
   final IconData icon;
+  final IconData? activeIcon;
   final NavSection section;
   final List<String> allowedRoles;
   final Widget Function(BuildContext)? screenBuilder;
@@ -40,6 +41,7 @@ class NavItem {
     required this.id,
     required this.labelKey,
     required this.icon,
+    this.activeIcon,
     required this.section,
     required this.allowedRoles,
     this.screenBuilder,
@@ -77,6 +79,7 @@ class NavConfig {
       id: 'dashboard',
       labelKey: 'dashboard',
       icon: Icons.dashboard_outlined,
+      activeIcon: Icons.dashboard_rounded,
       section: NavSection.core,
       allowedRoles: ['ALL'],
       isCoreTab: true,
@@ -87,6 +90,7 @@ class NavConfig {
       id: 'members',
       labelKey: 'members',
       icon: Icons.people_alt_outlined,
+      activeIcon: Icons.people_rounded,
       section: NavSection.core,
       allowedRoles: ['ALL'],
       isCoreTab: true,
@@ -97,6 +101,7 @@ class NavConfig {
       id: 'meetings',
       labelKey: 'meetings',
       icon: Icons.event_available_outlined,
+      activeIcon: Icons.event_note_rounded,
       section: NavSection.core,
       allowedRoles: ['ALL'],
       isCoreTab: true,
@@ -107,6 +112,7 @@ class NavConfig {
       id: 'loans',
       labelKey: 'loans',
       icon: Icons.credit_score_outlined,
+      activeIcon: Icons.credit_score_rounded,
       section: NavSection.core,
       allowedRoles: ['ALL'],
       isCoreTab: true,
@@ -117,6 +123,7 @@ class NavConfig {
       id: 'receipts',
       labelKey: 'receipts',
       icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
       section: NavSection.core,
       allowedRoles: ['ALL'],
       isCoreTab: true,
@@ -129,6 +136,7 @@ class NavConfig {
       id: 'cycles',
       labelKey: 'cycles',
       icon: Icons.autorenew_rounded,
+      activeIcon: Icons.autorenew_rounded,
       section: NavSection.operations,
       allowedRoles: ['ALL'],
       screenBuilder: _buildCycles,
@@ -137,6 +145,7 @@ class NavConfig {
       id: 'fines',
       labelKey: 'fines',
       icon: Icons.gavel_outlined,
+      activeIcon: Icons.gavel_rounded,
       section: NavSection.operations,
       allowedRoles: ['ALL'],
       screenBuilder: _buildFines,
@@ -145,6 +154,7 @@ class NavConfig {
       id: 'myGuarantees',
       labelKey: 'myGuarantees',
       icon: Icons.verified_user_outlined,
+      activeIcon: Icons.verified_user_rounded,
       section: NavSection.operations,
       allowedRoles: ['ALL'],
       screenBuilder: _buildGuarantees,
@@ -153,6 +163,7 @@ class NavConfig {
       id: 'reconciliation',
       labelKey: 'reconciliation',
       icon: Icons.phone_android_rounded,
+      activeIcon: Icons.phone_android_rounded,
       section: NavSection.operations,
       allowedRoles: ['TREASURER', 'CHAIRPERSON', 'AUDITOR', 'PLATFORM_ADMIN'],
       screenBuilder: _buildReconciliation,
@@ -163,6 +174,7 @@ class NavConfig {
       id: 'governance',
       labelKey: 'governance',
       icon: Icons.how_to_vote_outlined,
+      activeIcon: Icons.how_to_vote_rounded,
       section: NavSection.leadership,
       allowedRoles: ['ALL'],
       screenBuilder: _buildGovernance,
@@ -171,6 +183,7 @@ class NavConfig {
       id: 'reports',
       labelKey: 'reports',
       icon: Icons.bar_chart_rounded,
+      activeIcon: Icons.bar_chart_rounded,
       section: NavSection.leadership,
       allowedRoles: [
         'CHAIRPERSON',
@@ -186,6 +199,7 @@ class NavConfig {
       id: 'subscription',
       labelKey: 'subscription',
       icon: Icons.workspace_premium_outlined,
+      activeIcon: Icons.workspace_premium_rounded,
       section: NavSection.leadership,
       allowedRoles: ['CHAIRPERSON', 'TREASURER', 'PLATFORM_ADMIN'],
       screenBuilder: _buildSubscription,
@@ -194,6 +208,7 @@ class NavConfig {
       id: 'federation',
       labelKey: 'federation',
       icon: Icons.account_balance_outlined,
+      activeIcon: Icons.account_balance_rounded,
       iconColor: AppColors.accent,
       section: NavSection.leadership,
       allowedRoles: ['CHAIRPERSON', 'SECRETARY', 'TREASURER', 'PLATFORM_ADMIN'],
@@ -203,6 +218,7 @@ class NavConfig {
       id: 'auditLogs',
       labelKey: 'auditLogs',
       icon: Icons.security_outlined,
+      activeIcon: Icons.security_rounded,
       section: NavSection.leadership,
       allowedRoles: ['AUDITOR', 'CHAIRPERSON', 'SECRETARY', 'PLATFORM_ADMIN'],
       screenBuilder: _buildAuditLogs,
@@ -213,6 +229,7 @@ class NavConfig {
       id: 'aiAdvisor',
       labelKey: 'aiAdvisor',
       icon: Icons.auto_awesome_rounded,
+      activeIcon: Icons.auto_awesome_rounded,
       iconColor: AppColors.accent,
       section: NavSection.intelligence,
       allowedRoles: ['ALL'],
@@ -224,6 +241,7 @@ class NavConfig {
       id: 'settings',
       labelKey: 'settings',
       icon: Icons.settings_outlined,
+      activeIcon: Icons.settings_rounded,
       section: NavSection.system,
       allowedRoles: ['ALL'],
       screenBuilder: _buildSettings,
@@ -246,6 +264,43 @@ class NavConfig {
   static Widget _buildAuditLogs(BuildContext context) => const AuditLogsScreen();
   static Widget _buildAiAdvisor(BuildContext context) => const AiAdvisorScreen();
   static Widget _buildSettings(BuildContext context) => const SettingsScreen();
+
+  /// Returns the 5 role-tailored primary action tabs for the bottom navigation bar.
+  static List<NavItem> getBottomNavItemsForRole(String role) {
+    final r = role.toUpperCase();
+    final itemMap = {for (var item in allNavItems) item.id: item};
+
+    List<String> targetIds;
+    switch (r) {
+      case 'TREASURER':
+        targetIds = ['dashboard', 'meetings', 'reconciliation', 'reports', 'receipts'];
+        break;
+      case 'CHAIRPERSON':
+        targetIds = ['dashboard', 'meetings', 'loans', 'members', 'reports'];
+        break;
+      case 'SECRETARY':
+        targetIds = ['dashboard', 'meetings', 'members', 'governance', 'receipts'];
+        break;
+      case 'LOAN_OFFICER':
+        targetIds = ['dashboard', 'loans', 'myGuarantees', 'members', 'reports'];
+        break;
+      case 'AUDITOR':
+        targetIds = ['dashboard', 'auditLogs', 'reconciliation', 'reports', 'receipts'];
+        break;
+      case 'PLATFORM_ADMIN':
+        targetIds = ['dashboard', 'members', 'reconciliation', 'auditLogs', 'reports'];
+        break;
+      case 'MEMBER':
+      default:
+        targetIds = ['dashboard', 'meetings', 'loans', 'myGuarantees', 'receipts'];
+        break;
+    }
+
+    return targetIds
+        .map((id) => itemMap[id])
+        .whereType<NavItem>()
+        .toList();
+  }
 
   /// Filters all navigation items that the specified role has permission to access.
   static List<NavItem> getNavItemsForRole(String role) {

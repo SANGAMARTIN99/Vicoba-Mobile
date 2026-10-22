@@ -10,11 +10,6 @@ import '../../guards/route_guards.dart';
 import '../../navigation/nav_config.dart';
 import '../auth/login_screen.dart';
 import '../auth/switch_context_dialog.dart';
-import '../dashboard/dashboard_screen.dart';
-import '../loans/loans_screen.dart';
-import '../meetings/meetings_screen.dart';
-import '../members/members_screen.dart';
-import '../receipts/receipts_screen.dart';
 
 class MainShell extends StatefulWidget {
   final int initialIndex;
@@ -26,14 +21,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   late int _currentIndex;
-
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const MembersScreen(),
-    const MeetingsScreen(),
-    const LoansScreen(),
-    const ReceiptsScreen(),
-  ];
+  String? _currentRole;
 
   @override
   void initState() {
@@ -59,6 +47,17 @@ class _MainShellState extends State<MainShell> {
     final activeRole = auth.currentRole;
     final badgeInfo = NavConfig.getRoleBadgeInfo(activeRole, isDark);
     final groupedItems = NavConfig.getGroupedNavItemsForRole(activeRole);
+    final bottomNavItems = NavConfig.getBottomNavItemsForRole(activeRole);
+
+    // Safeguard index when role changes dynamically
+    if (_currentRole != activeRole) {
+      _currentRole = activeRole;
+      if (_currentIndex >= bottomNavItems.length) {
+        _currentIndex = 0;
+      }
+    } else if (_currentIndex >= bottomNavItems.length) {
+      _currentIndex = 0;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -259,18 +258,7 @@ class _MainShellState extends State<MainShell> {
                       isDark,
                     ),
                     ...groupedItems[NavSection.core]!.map(
-                      (item) => _DrawerItem(
-                        icon: item.icon,
-                        label: l10n.translate(item.labelKey),
-                        selected: _currentIndex == item.tabIndex,
-                        iconColor: item.iconColor,
-                        onTap: () {
-                          Navigator.pop(context);
-                          if (item.tabIndex != null) {
-                            _onTabTapped(item.tabIndex!);
-                          }
-                        },
-                      ),
+                      (item) => _buildDrawerItem(item, bottomNavItems, l10n, context),
                     ),
                   ],
 
@@ -283,25 +271,7 @@ class _MainShellState extends State<MainShell> {
                       isDark,
                     ),
                     ...groupedItems[NavSection.operations]!.map(
-                      (item) => _DrawerItem(
-                        icon: item.icon,
-                        label: l10n.translate(item.labelKey),
-                        iconColor: item.iconColor,
-                        onTap: () {
-                          Navigator.pop(context);
-                          if (item.screenBuilder != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => ProtectedRoute(
-                                  allowedRoles: item.allowedRoles,
-                                  child: item.screenBuilder!(ctx),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      (item) => _buildDrawerItem(item, bottomNavItems, l10n, context),
                     ),
                   ],
 
@@ -314,25 +284,7 @@ class _MainShellState extends State<MainShell> {
                       isDark,
                     ),
                     ...groupedItems[NavSection.leadership]!.map(
-                      (item) => _DrawerItem(
-                        icon: item.icon,
-                        label: l10n.translate(item.labelKey),
-                        iconColor: item.iconColor,
-                        onTap: () {
-                          Navigator.pop(context);
-                          if (item.screenBuilder != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => ProtectedRoute(
-                                  allowedRoles: item.allowedRoles,
-                                  child: item.screenBuilder!(ctx),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      (item) => _buildDrawerItem(item, bottomNavItems, l10n, context),
                     ),
                   ],
 
@@ -340,25 +292,7 @@ class _MainShellState extends State<MainShell> {
                   if (groupedItems.containsKey(NavSection.intelligence)) ...[
                     const Divider(height: 16),
                     ...groupedItems[NavSection.intelligence]!.map(
-                      (item) => _DrawerItem(
-                        icon: item.icon,
-                        label: l10n.translate(item.labelKey),
-                        iconColor: item.iconColor ?? AppColors.accent,
-                        onTap: () {
-                          Navigator.pop(context);
-                          if (item.screenBuilder != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => ProtectedRoute(
-                                  allowedRoles: item.allowedRoles,
-                                  child: item.screenBuilder!(ctx),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      (item) => _buildDrawerItem(item, bottomNavItems, l10n, context),
                     ),
                   ],
 
@@ -371,25 +305,7 @@ class _MainShellState extends State<MainShell> {
                   ),
                   if (groupedItems.containsKey(NavSection.system)) ...[
                     ...groupedItems[NavSection.system]!.map(
-                      (item) => _DrawerItem(
-                        icon: item.icon,
-                        label: l10n.translate(item.labelKey),
-                        iconColor: item.iconColor,
-                        onTap: () {
-                          Navigator.pop(context);
-                          if (item.screenBuilder != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => ProtectedRoute(
-                                  allowedRoles: item.allowedRoles,
-                                  child: item.screenBuilder!(ctx),
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      (item) => _buildDrawerItem(item, bottomNavItems, l10n, context),
                     ),
                   ],
 
@@ -415,39 +331,55 @@ class _MainShellState extends State<MainShell> {
           ],
         ),
       ),
-      body: _screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: bottomNavItems.map((item) => item.screenBuilder!(context)).toList(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.dashboard_outlined),
-            activeIcon: const Icon(Icons.dashboard_rounded),
-            label: l10n.translate('dashboard'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people_outline_rounded),
-            activeIcon: const Icon(Icons.people_rounded),
-            label: l10n.translate('members'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.event_note_outlined),
-            activeIcon: const Icon(Icons.event_note_rounded),
-            label: l10n.translate('meetings'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.credit_score_outlined),
-            activeIcon: const Icon(Icons.credit_score_rounded),
-            label: l10n.translate('loans'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt_long_outlined),
-            activeIcon: const Icon(Icons.receipt_long_rounded),
-            label: l10n.translate('receipts'),
-          ),
-        ],
+        items: bottomNavItems.map((item) {
+          return BottomNavigationBarItem(
+            icon: Icon(item.icon),
+            activeIcon: Icon(item.activeIcon ?? item.icon),
+            label: l10n.translate(item.labelKey),
+          );
+        }).toList(),
       ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    NavItem item,
+    List<NavItem> bottomNavItems,
+    AppLocalizations l10n,
+    BuildContext context,
+  ) {
+    final bottomNavIdx = bottomNavItems.indexWhere((nav) => nav.id == item.id);
+    final isSelected = bottomNavIdx != -1 && _currentIndex == bottomNavIdx;
+
+    return _DrawerItem(
+      icon: item.icon,
+      label: l10n.translate(item.labelKey),
+      selected: isSelected,
+      iconColor: item.iconColor,
+      onTap: () {
+        Navigator.pop(context);
+        if (bottomNavIdx != -1) {
+          _onTabTapped(bottomNavIdx);
+        } else if (item.screenBuilder != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) => ProtectedRoute(
+                allowedRoles: item.allowedRoles,
+                child: item.screenBuilder!(ctx),
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 

@@ -85,5 +85,28 @@ void main() {
       final memberBadge = NavConfig.getRoleBadgeInfo('MEMBER', false);
       expect(memberBadge.roleKey, equals('role_MEMBER'));
     });
+
+    test('getBottomNavItemsForRole returns exactly 5 tailored action tabs per role', () {
+      final memberTabs = NavConfig.getBottomNavItemsForRole('MEMBER').map((i) => i.id).toList();
+      expect(memberTabs, equals(['dashboard', 'meetings', 'loans', 'myGuarantees', 'receipts']));
+
+      final treasurerTabs = NavConfig.getBottomNavItemsForRole('TREASURER').map((i) => i.id).toList();
+      expect(treasurerTabs, equals(['dashboard', 'meetings', 'reconciliation', 'reports', 'receipts']));
+
+      final chairpersonTabs = NavConfig.getBottomNavItemsForRole('CHAIRPERSON').map((i) => i.id).toList();
+      expect(chairpersonTabs, equals(['dashboard', 'meetings', 'loans', 'members', 'reports']));
+
+      final secretaryTabs = NavConfig.getBottomNavItemsForRole('SECRETARY').map((i) => i.id).toList();
+      expect(secretaryTabs, equals(['dashboard', 'meetings', 'members', 'governance', 'receipts']));
+
+      final loanOfficerTabs = NavConfig.getBottomNavItemsForRole('LOAN_OFFICER').map((i) => i.id).toList();
+      expect(loanOfficerTabs, equals(['dashboard', 'loans', 'myGuarantees', 'members', 'reports']));
+
+      final auditorTabs = NavConfig.getBottomNavItemsForRole('AUDITOR').map((i) => i.id).toList();
+      expect(auditorTabs, equals(['dashboard', 'auditLogs', 'reconciliation', 'reports', 'receipts']));
+
+      final adminTabs = NavConfig.getBottomNavItemsForRole('PLATFORM_ADMIN').map((i) => i.id).toList();
+      expect(adminTabs, equals(['dashboard', 'members', 'reconciliation', 'auditLogs', 'reports']));
+    });
   });
 }
